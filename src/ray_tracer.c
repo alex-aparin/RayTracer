@@ -1,4 +1,5 @@
 #include "ray_tracer.h"
+#include "graphical_object.h"
 
 static int w = 100;
 static int h = 100;
@@ -27,9 +28,9 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
 {
     w = canvas_width;
     h = canvas_height;
-    world_sphere sphere;
-    zero(&sphere.center);
-    sphere.radius = 10;
+    world_point sphere_center = { 0.0, 0.0, 10.005f };
+    color sphere_color = { 0, 255, 0 };
+    graphic_object sphere_object = create_sphere_object(sphere_center, 10, sphere_color);
     for (int row = 0; row < h; ++row)
     {
         for (int col = 0; col < w; ++col)
@@ -42,7 +43,7 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             zero(&line.origin);
             line.dir = p;
             float roots[2];
-            if (intersect_line_with_sphere(&line, &sphere, roots))
+            if (sphere_object.intersect_func(sphere_object.instance, &line, roots))
             {
                 color c;
                 c.channels[0] = 0;
@@ -60,4 +61,5 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
                 put_pixel(pixel_loc, c);
         }
     }
+    sphere_object.destroy_func(sphere_object.instance);
 }
