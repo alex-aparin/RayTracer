@@ -1,10 +1,13 @@
 #ifndef GEOMETRY_H_INCLUDED__
 #define GEOMETRY_H_INCLUDED__
 
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+
 typedef enum
 {
     NOT_INTERSECTED = 0x0,
-    INTERSECTED
+    INTERSECTED = 0x1
 } intersection_result;
 
 typedef struct
@@ -46,6 +49,7 @@ void zero(world_point* const p);
 world_point sum(world_point const p1, world_point const p2);
 world_point sub(world_point const p1, world_point const p2);
 world_point mul_by_factor(world_point const p1, float factor);
+world_point line_point(world_line line, float t);
 float scalar_product(world_point const p1, world_point const p2);
 intersection_result intersect_line_with_sphere(world_line* const line, world_sphere* const sphere, float* const t);
 intersection_result intersect(world_line* const line, world_rect* const rect, float* const t);

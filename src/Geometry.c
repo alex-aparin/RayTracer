@@ -37,6 +37,12 @@ world_point mul_by_factor(world_point const p1, float factor)
     return res;
 }
 
+world_point line_point(world_line line, float t)
+{
+    world_point res = sum(line.origin, mul_by_factor(line.dir, t));
+    return res;
+}
+
 float scalar_product(world_point const p1, world_point const p2)
 {
     const float* const arr1 = p1.coords;
@@ -49,8 +55,7 @@ intersection_result intersect_line_with_sphere(world_line* const line, world_sph
     if (!line || !sphere || !t)
         return NOT_INTERSECTED;
     const world_point delta = sub(line->origin, sphere->center);
-    return solve_quadratic(scalar_product(line->dir, line->dir), scalar_product(line->dir, mul_by_factor(delta, 2.0f)), scalar_product(delta, delta) - sphere->radius * sphere->radius, t) == 0 ?
-        NOT_INTERSECTED : INTERSECTED;
+    return solve_quadratic(scalar_product(line->dir, line->dir), scalar_product(line->dir, mul_by_factor(delta, 2.0f)), scalar_product(delta, delta) - sphere->radius * sphere->radius, t);
 }
 
 intersection_result intersect(world_line* const line, world_rect* const rect, float* const t)

@@ -5,6 +5,7 @@ static int w = 100;
 static int h = 100;
 static float view_port_w = 100;
 static float view_port_h = 100;
+#define GRAPHICAL_OBJECTS_COUNT 2
 
 world_point viewport_point(screen_point p)
 {
@@ -26,11 +27,21 @@ world_point from_viewport(world_point p)
 
 void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
 {
+    if (!put_pixel)
+        return;
     w = canvas_width;
     h = canvas_height;
-    world_point sphere_center = { 0.0, 0.0, 10.005f };
-    color sphere_color = { 0, 255, 0 };
-    graphic_object sphere_object = create_sphere_object(sphere_center, 10, sphere_color);
+    graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
+    {
+        world_point sphere_center = { 0.0, 0.0, 10.005f };
+        color sphere_color = { 0, 255, 0 };
+        graphical_objects[0] = create_sphere_object(sphere_center, 10, sphere_color);
+    }
+    {
+        world_point sphere_center = { 0.0, 0.0, 10.008f };
+        color sphere_color = { 255, 0, 0 };
+        graphical_objects[1] = create_sphere_object(sphere_center, 12, sphere_color);
+    }
     for (int row = 0; row < h; ++row)
     {
         for (int col = 0; col < w; ++col)
@@ -42,15 +53,29 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             world_line line;
             zero(&line.origin);
             line.dir = p;
-            float roots[2];
-            if (sphere_object.intersect_func(sphere_object.instance, &line, roots))
+            int object_index = -1;
+            float t = 0;
+            for (int i = 0; i < 2; ++i)
             {
-                color c;
-                c.channels[0] = 0;
-                c.channels[1] = 255;
-                c.channels[2] = 0;
-                if (put_pixel)
-                    put_pixel(pixel_loc, c);
+                float roots[2];
+                const int roots_count = (int)graphical_objects[i].intersect_func(graphical_objects[i].instance, &line, roots);
+                if (roots_count == 0)
+                    continue;
+                for (int root_index = 0; root_index < roots_count; ++root_index)
+                {
+                    if (roots[root_index] < 1.0f)
+                        continue;
+                    if (object_index == -1 || roots[root_index] < t)
+                    {
+                        object_index = root_index;
+                        t = roots[root_index];
+                    }
+                }
+            }
+            if (object_index != -1)
+            {
+                color c = graphical_objects[object_index].color_func(graphical_objects[object_index].instance, line_point(line, t));
+                put_pixel(pixel_loc, c);
                 continue;
             }
             color c;
@@ -61,5 +86,8 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
                 put_pixel(pixel_loc, c);
         }
     }
-    sphere_object.destroy_func(sphere_object.instance);
+    for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
+    {
+        graphical_objects[i].destroy_func(graphical_objects[i].instance);
+    }
 }

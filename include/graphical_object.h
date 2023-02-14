@@ -4,11 +4,13 @@
 #include "geometry.h"
 
 typedef intersection_result(*intersect_with_line_func)(void*, world_line* const, float* const t);
+typedef color(*color_getter_func)(void*, const world_point);
 typedef void(*destroy_instance_func)(void*);
 typedef struct
 {
 	void* instance;
 	intersect_with_line_func intersect_func;
+	color_getter_func color_func;
 	destroy_instance_func destroy_func;
 } graphic_object;
 
