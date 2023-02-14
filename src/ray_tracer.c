@@ -40,7 +40,7 @@ int find_nearest_object_intersection(const world_line line, graphic_object* obje
                 continue;
             if (object_index == -1 || roots[root_index] < *t)
             {
-                object_index = root_index;
+                object_index = i;
                 *t = roots[root_index];
             }
         }
