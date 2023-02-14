@@ -25,6 +25,29 @@ world_point from_viewport(world_point p)
     return res;
 }
 
+int find_nearest_object_intersection(const world_line line, graphic_object* objects, int count, float* t)
+{
+    int object_index = -1;
+    for (int i = 0; i < count; ++i)
+    {
+        float roots[2];
+        const int roots_count = (int)objects[i].intersect_func(objects[i].instance, &line, roots);
+        if (roots_count == 0)
+            continue;
+        for (int root_index = 0; root_index < roots_count; ++root_index)
+        {
+            if (roots[root_index] < 1.0f)
+                continue;
+            if (object_index == -1 || roots[root_index] < *t)
+            {
+                object_index = root_index;
+                *t = roots[root_index];
+            }
+        }
+    }
+    return object_index;
+}
+
 void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
 {
     if (!put_pixel)
@@ -53,25 +76,8 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             world_line line;
             zero(&line.origin);
             line.dir = p;
-            int object_index = -1;
             float t = 0;
-            for (int i = 0; i < 2; ++i)
-            {
-                float roots[2];
-                const int roots_count = (int)graphical_objects[i].intersect_func(graphical_objects[i].instance, &line, roots);
-                if (roots_count == 0)
-                    continue;
-                for (int root_index = 0; root_index < roots_count; ++root_index)
-                {
-                    if (roots[root_index] < 1.0f)
-                        continue;
-                    if (object_index == -1 || roots[root_index] < t)
-                    {
-                        object_index = root_index;
-                        t = roots[root_index];
-                    }
-                }
-            }
+            int object_index = find_nearest_object_intersection(line,  graphical_objects, GRAPHICAL_OBJECTS_COUNT, &t);
             if (object_index != -1)
             {
                 color c = graphical_objects[object_index].color_func(graphical_objects[object_index].instance, line_point(line, t));
