@@ -4,7 +4,7 @@
 #include "ray_tracer.h"
 
 
-static color_t image[100][100];
+static color_t image[500][500];
 
 void put_pixel_func(screen_point p, color_t pixel)
 {
@@ -17,10 +17,10 @@ int main(void)
     {
         int i, j;
         FILE* fp = fopen("first.ppm", "w"); /* b - binary mode */
-        fprintf(fp, "P3\n%d %d\n255\n", 100, 100);
-        for (j = 0; j < 100; ++j)
+        fprintf(fp, "P3\n%d %d\n255\n", 500, 500);
+        for (j = 0; j < 500; ++j)
         {
-            for (i = 0; i < 100; ++i)
+            for (i = 0; i < 500; ++i)
             {
                 color_t c = image[j][i];
                 fprintf(fp, " %d %d %d ", c.channels[0], c.channels[1], c.channels[2]);

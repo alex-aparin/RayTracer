@@ -1,10 +1,10 @@
 #include "ray_tracer.h"
 #include "graphical_object.h"
 
-static int w = 100;
-static int h = 100;
-static float view_port_w = 100;
-static float view_port_h = 100;
+static int w = 500;
+static int h = 500;
+static float view_port_w = 500;
+static float view_port_h = 500;
 #define GRAPHICAL_OBJECTS_COUNT 2
 #define LIGHT_OBJECTS_COUNT 1
 
@@ -59,19 +59,19 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
     {
         world_point location;
         zero(&location);
-        location.coords[2] = 10;
-        light_objects[0] = create_point_light(location, 0.5);
+        location.coords[2] = 100;
+        light_objects[0] = create_point_light(location, 0.8);
     }
     graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
     {
         world_point sphere_center = { 0.0, 0.0, 10.005f };
         color_t sphere_color = { 0, 255, 0 };
-        graphical_objects[0] = create_sphere_object(sphere_center, 10, sphere_color);
+        graphical_objects[0] = create_sphere_object(sphere_center, 200, sphere_color);
     }
     {
         world_point sphere_center = { 0.0, 0.0, 10.008f };
         color_t sphere_color = { 255, 0, 0 };
-        graphical_objects[1] = create_sphere_object(sphere_center, 12, sphere_color);
+        graphical_objects[1] = create_sphere_object(sphere_center, 320, sphere_color);
     }
     for (int row = 0; row < h; ++row)
     {
