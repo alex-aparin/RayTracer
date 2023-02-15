@@ -114,7 +114,7 @@ float compute_light_intensity(light_object* const lights, const int count, const
 	{
 		intensity += lights[i].intensity_func(lights[i].instance, normal, view_vector);
 	}
-	return MAX(intensity, 1.0f);
+	return MIN(intensity, 1.0f);
 }
 
 graphic_object create_sphere_object(world_point center, float radius, color_t color)

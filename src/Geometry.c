@@ -31,9 +31,9 @@ world_point sub(world_point const p1, world_point const p2)
 color_t mul_color_by_factor(color_t const color, float factor)
 {
     color_t res = color;
-    res.channels[0] = MAX(255, res.channels[0] * factor);
-    res.channels[1] = MAX(255, res.channels[1] * factor);
-    res.channels[2] = MAX(255, res.channels[2] * factor);
+    res.channels[0] = MIN(255, res.channels[0] * factor);
+    res.channels[1] = MIN(255, res.channels[1] * factor);
+    res.channels[2] = MIN(255, res.channels[2] * factor);
     return res;
 }
 
