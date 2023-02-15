@@ -4,9 +4,9 @@
 #include "ray_tracer.h"
 
 
-static color image[100][100];
+static color_t image[100][100];
 
-void put_pixel_func(screen_point p, color pixel)
+void put_pixel_func(screen_point p, color_t pixel)
 {
     image[p.coords[1]][p.coords[0]] = pixel;
 }
@@ -22,7 +22,7 @@ int main(void)
         {
             for (i = 0; i < 100; ++i)
             {
-                color c = image[j][i];
+                color_t c = image[j][i];
                 fprintf(fp, " %d %d %d ", c.channels[0], c.channels[1], c.channels[2]);
             }
             fprintf(fp, "\n");

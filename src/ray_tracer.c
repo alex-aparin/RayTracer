@@ -6,6 +6,7 @@ static int h = 100;
 static float view_port_w = 100;
 static float view_port_h = 100;
 #define GRAPHICAL_OBJECTS_COUNT 2
+#define LIGHT_OBJECTS_COUNT 1
 
 world_point viewport_point(screen_point p)
 {
@@ -54,15 +55,22 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
         return;
     w = canvas_width;
     h = canvas_height;
+    light_object light_objects[LIGHT_OBJECTS_COUNT];
+    {
+        world_point location;
+        zero(&location);
+        location.coords[2] = 10;
+        light_objects[0] = create_point_light(location, 0.5);
+    }
     graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
     {
         world_point sphere_center = { 0.0, 0.0, 10.005f };
-        color sphere_color = { 0, 255, 0 };
+        color_t sphere_color = { 0, 255, 0 };
         graphical_objects[0] = create_sphere_object(sphere_center, 10, sphere_color);
     }
     {
         world_point sphere_center = { 0.0, 0.0, 10.008f };
-        color sphere_color = { 255, 0, 0 };
+        color_t sphere_color = { 255, 0, 0 };
         graphical_objects[1] = create_sphere_object(sphere_center, 12, sphere_color);
     }
     for (int row = 0; row < h; ++row)
@@ -80,17 +88,22 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             int object_index = find_nearest_object_intersection(line,  graphical_objects, GRAPHICAL_OBJECTS_COUNT, &t);
             if (object_index != -1)
             {
-                color c = graphical_objects[object_index].color_func(graphical_objects[object_index].instance, line_point(line, t));
-                put_pixel(pixel_loc, c);
+                const material_t material = graphical_objects[object_index].material_func(graphical_objects[object_index].instance, line_point(line, t));
+                const color_t color = mul_color_by_factor(material.color, compute_light_intensity(light_objects, LIGHT_OBJECTS_COUNT, material.normal, p));
+                put_pixel(pixel_loc, color);
                 continue;
             }
-            color c;
+            color_t c;
             c.channels[0] = 0;
             c.channels[1] = 0;
             c.channels[2] = 0;
             if (put_pixel)
                 put_pixel(pixel_loc, c);
         }
+    }
+    for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
+    {
+        light_objects[i].destroy_func(light_objects[i].instance);
     }
     for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
     {
