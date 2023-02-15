@@ -50,22 +50,22 @@ void destroy_light_object(void* light_object)
 	free(light_object);
 }
 
-float ambient_light_intensity(void* instance, const world_point normal, const world_point view_vector)
+float ambient_light_intensity(void* instance, const world_point point, const world_point normal, const world_point view_vector)
 {
 	return ((ambient_light_object*)instance)->intensity;
 }
 
-float point_light_intensity(void* instance, const world_point normal, const world_point view_vector)
+float point_light_intensity(void* instance, const world_point point, const world_point normal, const world_point view_vector)
 {
 	const point_light_object* const point_light = (point_light_object*)instance;
-	const world_point negated_direction = mul_by_factor(point_light->location, -1.0f);
-	const float cos_a = scalar_product(normal, negated_direction) / length(normal) / length(negated_direction);
+	const world_point light_direction = sub(point_light->location, point);
+	const float cos_a = scalar_product(normal, light_direction) / length(normal) / length(light_direction);
 	if (cos_a <= 0.0f)
 		return 0.0f;
 	return cos_a * point_light->intensity;
 }
 
-float directed_light_intensity(void* instance, const world_point normal, const world_point view_vector)
+float directed_light_intensity(void* instance, const world_point point, const world_point normal, const world_point view_vector)
 {
 	return 0.0f;
 }
@@ -105,14 +105,14 @@ light_object create_directed_light(const world_point direction, float intensity)
 	return light;
 }
 
-float compute_light_intensity(light_object* const lights, const int count, const world_point normal, const world_point view_vector)
+float compute_light_intensity(light_object* const lights, const int count, const world_point point, const world_point normal, const world_point view_vector)
 {
 	if (count == 0)
 		return 1.0f;
 	float intensity = 0.0f;
 	for (int i = 0; i < count; ++i)
 	{
-		intensity += lights[i].intensity_func(lights[i].instance, normal, view_vector);
+		intensity += lights[i].intensity_func(lights[i].instance, point, normal, view_vector);
 	}
 	return MIN(intensity, 1.0f);
 }

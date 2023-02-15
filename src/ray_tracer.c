@@ -1,27 +1,25 @@
 #include "ray_tracer.h"
 #include "graphical_object.h"
 
-static int w = 500;
-static int h = 500;
 static float view_port_w = 500;
 static float view_port_h = 500;
 #define GRAPHICAL_OBJECTS_COUNT 2
 #define LIGHT_OBJECTS_COUNT 1
 
-world_point viewport_point(screen_point p)
+world_point viewport_point(screen_point p, const int canvas_width, const int canvas_height)
 {
     world_point res;
-    res.coords[0] = (p.coords[0] - w / 2.0f);
-    res.coords[1] = (h / 2.0f - p.coords[1]);
+    res.coords[0] = (p.coords[0] - canvas_width / 2.0f);
+    res.coords[1] = (canvas_height / 2.0f - p.coords[1]);
     res.coords[2] = 1.0f;
     return res;
 }
 
-world_point from_viewport(world_point p)
+world_point from_viewport(world_point p, const int canvas_width, const int canvas_height)
 {
     world_point res;
-    res.coords[0] = p.coords[0] * view_port_w / w;
-    res.coords[1] = p.coords[1] * view_port_h / h;
+    res.coords[0] = p.coords[0] * view_port_w / canvas_width;
+    res.coords[1] = p.coords[1] * view_port_h / canvas_height;
     res.coords[2] = 1.0f;
     return res;
 }
@@ -53,14 +51,12 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
 {
     if (!put_pixel)
         return;
-    w = canvas_width;
-    h = canvas_height;
     light_object light_objects[LIGHT_OBJECTS_COUNT];
     {
         world_point location;
         zero(&location);
         location.coords[2] = 100;
-        light_objects[0] = create_point_light(location, 0.8);
+        light_objects[0] = create_point_light(location, 0.8f);
     }
     graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
     {
@@ -73,14 +69,14 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
         color_t sphere_color = { 255, 0, 0 };
         graphical_objects[1] = create_sphere_object(sphere_center, 320, sphere_color);
     }
-    for (int row = 0; row < h; ++row)
+    for (int row = 0; row < canvas_height; ++row)
     {
-        for (int col = 0; col < w; ++col)
+        for (int col = 0; col < canvas_width; ++col)
         {
             screen_point pixel_loc;
             pixel_loc.coords[0] = col;
             pixel_loc.coords[1] = row;
-            world_point p = from_viewport(viewport_point(pixel_loc));
+            world_point p = from_viewport(viewport_point(pixel_loc, canvas_width, canvas_height), canvas_width, canvas_height);
             world_line line;
             zero(&line.origin);
             line.dir = p;
@@ -88,8 +84,10 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             int object_index = find_nearest_object_intersection(line,  graphical_objects, GRAPHICAL_OBJECTS_COUNT, &t);
             if (object_index != -1)
             {
-                const material_t material = graphical_objects[object_index].material_func(graphical_objects[object_index].instance, line_point(line, t));
-                const color_t color = mul_color_by_factor(material.color, compute_light_intensity(light_objects, LIGHT_OBJECTS_COUNT, material.normal, p));
+                const world_point surface_point = line_point(line, t);
+                const material_t material = graphical_objects[object_index].material_func(graphical_objects[object_index].instance, surface_point);
+                const color_t color = mul_color_by_factor(material.color, 
+                    compute_light_intensity(light_objects, LIGHT_OBJECTS_COUNT, surface_point, material.normal, p));
                 put_pixel(pixel_loc, color);
                 continue;
             }
