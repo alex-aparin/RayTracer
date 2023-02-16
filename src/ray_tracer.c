@@ -6,7 +6,7 @@
 
 static float view_port_w = 1;
 static float view_port_h = 1;
-#define GRAPHICAL_OBJECTS_COUNT 3
+#define GRAPHICAL_OBJECTS_COUNT 4
 #define LIGHT_OBJECTS_COUNT 2
 #define T_EPS 0.00001f
 
@@ -216,6 +216,9 @@ void init_scene(scene_t* scene)
         world_point sphere_center = { -2.0, 0.0, 4.0f };
         color_t sphere_color = { 0, 255, 0 };
         scene->graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10, 0.3f);
+    }
+    {
+        scene->graphical_objects[3] = create_earth_object();
     }
 }
 

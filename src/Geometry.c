@@ -90,8 +90,20 @@ intersection_result intersect_line_with_sphere(const world_line* const line, wor
     return solve_quadratic(scalar_product(line->dir, line->dir), scalar_product(line->dir, mul_by_factor(delta, 2.0f)), scalar_product(delta, delta) - sphere->radius * sphere->radius, t);
 }
 
-intersection_result intersect(const world_line* const line, world_rect* const rect, float* const t)
+intersection_result intersect_line_with_plane(const world_line* const line, world_plane* const plane, float* const t)
 {
+    const float a = scalar_product(line->dir, plane->normal);
+    const float b = scalar_product(line->origin, plane->normal) + plane->D;
+    if (a == 0.0f)
+    {
+        if (a == b)
+        {
+            *t = 0.0f;
+            return INTERSECTED;
+        }
+        return NOT_INTERSECTED;
+    }
+    *t = -b / a;
     return INTERSECTED;
 }
 

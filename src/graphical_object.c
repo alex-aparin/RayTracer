@@ -27,9 +27,9 @@ material_t sphere_material_getter(void* instance, const world_point point)
 	return material;
 }
 
-void destroy_sphere_object(void* sphere_object)
+void destroy_base_object(void* base_graphical_object)
 {
-	free(sphere_object);
+	free(base_graphical_object);
 }
 
 graphic_object create_sphere_object(world_point center, float radius, color_t color, int specularity, float reflectivity)
@@ -44,6 +44,46 @@ graphic_object create_sphere_object(world_point center, float radius, color_t co
 	res.instance = sphere_object;
 	res.intersect_func = intersect_sphere_object;
 	res.material_func = sphere_material_getter;
-	res.destroy_func = destroy_sphere_object;
+	res.destroy_func = destroy_base_object;
+	return res;
+}
+
+typedef struct
+{
+	world_plane plane;
+	color_t color;
+} earth_object_t;
+
+intersection_result intersect_earth_object(void* instance, const world_line* const line, float* const roots)
+{
+	earth_object_t* earth = (earth_object_t*)(instance);
+	return intersect_line_with_plane(line, &earth->plane, roots);
+}
+
+material_t earth_material_getter(void* instance, const world_point point)
+{
+	earth_object_t* earth = (earth_object_t*)(instance);
+	material_t material;
+	material.color = earth->color;
+	material.normal = earth->plane.normal;
+	material.specularity = -1;
+	material.reflectivity = 0.0f;
+	return material;
+}
+
+graphic_object create_earth_object()
+{
+	graphic_object res;
+	earth_object_t* earth = malloc(sizeof(earth_object_t));
+	earth->color.channels[0] = 150;
+	earth->color.channels[1] = 150;
+	earth->color.channels[2] = 150;
+	earth->plane.D = 3;
+	zero(&earth->plane.normal);
+	earth->plane.normal.coords[2] = 1.0f;
+	res.instance = earth;
+	res.intersect_func = intersect_earth_object;
+	res.material_func = earth_material_getter;
+	res.destroy_func = destroy_base_object;
 	return res;
 }
