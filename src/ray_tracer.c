@@ -1,10 +1,10 @@
 #include "ray_tracer.h"
 #include "graphical_object.h"
 
-static float view_port_w = 500;
-static float view_port_h = 500;
-#define GRAPHICAL_OBJECTS_COUNT 2
-#define LIGHT_OBJECTS_COUNT 1
+static float view_port_w = 1;
+static float view_port_h = 1;
+#define GRAPHICAL_OBJECTS_COUNT 3
+#define LIGHT_OBJECTS_COUNT 2
 
 world_point viewport_point(screen_point p, const int canvas_width, const int canvas_height)
 {
@@ -53,21 +53,31 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
         return;
     light_object light_objects[LIGHT_OBJECTS_COUNT];
     {
+        light_objects[0] = create_ambient_light(0.2f);
+    }
+    {
         world_point location;
         zero(&location);
-        location.coords[2] = 100;
-        light_objects[0] = create_point_light(location, 0.8f);
+        location.coords[0] = 2;
+        location.coords[1] = 1;
+        location.coords[2] = 0;
+        light_objects[1] = create_point_light(location, 0.6f);
     }
     graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
     {
-        world_point sphere_center = { 0.0, 0.0, 10.005f };
-        color_t sphere_color = { 0, 255, 0 };
-        graphical_objects[0] = create_sphere_object(sphere_center, 200, sphere_color);
+        world_point sphere_center = { 0.0, -1.0f, 3.0f };
+        color_t sphere_color = { 255, 0, 0 };
+        graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 10);
     }
     {
-        world_point sphere_center = { 0.0, 0.0, 10.008f };
-        color_t sphere_color = { 255, 0, 0 };
-        graphical_objects[1] = create_sphere_object(sphere_center, 320, sphere_color);
+        world_point sphere_center = { 2.0, 0.0, 4.0f };
+        color_t sphere_color = { 0, 0, 255 };
+        graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 10);
+    }
+    {
+        world_point sphere_center = { -2.0, 0.0, 4.0f };
+        color_t sphere_color = { 0, 255, 0};
+        graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10);
     }
     for (int row = 0; row < canvas_height; ++row)
     {
@@ -86,15 +96,15 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             {
                 const world_point surface_point = line_point(line, t);
                 const material_t material = graphical_objects[object_index].material_func(graphical_objects[object_index].instance, surface_point);
-                const color_t color = mul_color_by_factor(material.color, 
-                    compute_light_intensity(light_objects, LIGHT_OBJECTS_COUNT, surface_point, material.normal, p));
+                const float light_intensity = compute_light_intensity(light_objects, LIGHT_OBJECTS_COUNT, surface_point, material, p);
+                const color_t color = mul_color_by_factor(material.color, light_intensity);
                 put_pixel(pixel_loc, color);
                 continue;
             }
             color_t c;
-            c.channels[0] = 0;
-            c.channels[1] = 0;
-            c.channels[2] = 0;
+            c.channels[0] = 150;
+            c.channels[1] = 150;
+            c.channels[2] = 150;
             if (put_pixel)
                 put_pixel(pixel_loc, c);
         }

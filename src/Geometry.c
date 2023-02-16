@@ -53,7 +53,7 @@ float length(const world_point p)
 
 world_point normalize(const world_point p)
 {
-    return mul_by_factor(p, length(p));
+    return mul_by_factor(p, 1.0f / length(p));
 }
 
 world_point line_point(world_line line, float t)

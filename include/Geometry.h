@@ -24,6 +24,7 @@ typedef struct
 {
     color_t color;
     world_point normal;
+    int specularity;
 } material_t;
 
 typedef world_point world_vector;

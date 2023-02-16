@@ -14,7 +14,7 @@ typedef struct
 	destroy_instance_func destroy_func;
 } graphic_object;
 
-typedef float (*intensity_getter_func)(void*, const world_point point, const world_point normal, const world_point view_vector);
+typedef float (*intensity_getter_func)(void*, const world_point point, const material_t material, const world_point view_vector);
 typedef void(*destroy_light_instance_func)(void*);
 typedef struct
 {
@@ -27,8 +27,8 @@ light_object create_ambient_light(float intensity);
 light_object create_point_light(const world_point location, float intensity);
 light_object create_directed_light(const world_point direction, float intensity);
 
-float compute_light_intensity(light_object* const lights, const int count, const world_point point, const world_point normal, const world_point view_vector);
+float compute_light_intensity(light_object* const lights, const int count, const world_point point, const material_t material, const world_point view_vector);
 
-graphic_object create_sphere_object(world_point center, float radius, color_t color_value);
+graphic_object create_sphere_object(world_point center, float radius, color_t color_value, int specularity);
 
 #endif
