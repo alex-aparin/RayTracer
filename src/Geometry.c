@@ -46,6 +46,11 @@ world_point mul_by_factor(world_point const p1, float factor)
     return res;
 }
 
+world_point reflect(world_point dir, world_point normal)
+{
+    return sub(mul_by_factor(normal, 2.0f * scalar_product(dir, normal)), dir);
+}
+
 world_line create_line(world_point const origin, world_point const dir)
 {
     world_line line;
@@ -104,4 +109,13 @@ int solve_quadratic(float a, float b, float c, float* const t)
     t[0] = (-b - sqrt_d) / 2.0f / a;
     t[1] = (-b + sqrt_d) / 2.0f / a;
     return 2;
+}
+
+color_t lerp_color(const color_t lhs, const color_t rhs, const float t)
+{
+    color_t res;
+    res.channels[0] = lhs.channels[0] + t * (rhs.channels[0] - lhs.channels[0]);
+    res.channels[1] = lhs.channels[1] + t * (rhs.channels[1] - lhs.channels[1]);
+    res.channels[2] = lhs.channels[2] + t * (rhs.channels[2] - lhs.channels[2]);
+    return res;
 }

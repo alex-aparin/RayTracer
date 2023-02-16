@@ -6,6 +6,7 @@ typedef struct
 	world_sphere sphere;
 	color_t color;
 	int specularity;
+	float reflectivity;
 } SphereObject;
 
 
@@ -22,6 +23,7 @@ material_t sphere_material_getter(void* instance, const world_point point)
 	material.color = sphere_object->color;
 	material.normal = normalize(sub(point, sphere_object->sphere.center));
 	material.specularity = sphere_object->specularity;
+	material.reflectivity = sphere_object->reflectivity;
 	return material;
 }
 
@@ -30,7 +32,7 @@ void destroy_sphere_object(void* sphere_object)
 	free(sphere_object);
 }
 
-graphic_object create_sphere_object(world_point center, float radius, color_t color, int specularity)
+graphic_object create_sphere_object(world_point center, float radius, color_t color, int specularity, float reflectivity)
 {
 	graphic_object res;
 	SphereObject* sphere_object = malloc(sizeof(SphereObject));
@@ -38,6 +40,7 @@ graphic_object create_sphere_object(world_point center, float radius, color_t co
 	sphere_object->sphere.radius = radius;
 	sphere_object->color = color;
 	sphere_object->specularity = specularity;
+	sphere_object->reflectivity = reflectivity;
 	res.instance = sphere_object;
 	res.intersect_func = intersect_sphere_object;
 	res.material_func = sphere_material_getter;

@@ -14,6 +14,6 @@ typedef struct
 	destroy_instance_func destroy_func;
 } graphic_object;
 
-graphic_object create_sphere_object(world_point center, float radius, color_t color_value, int specularity);
+graphic_object create_sphere_object(world_point center, float radius, color_t color_value, int specularity, float reflectivity);
 
 #endif

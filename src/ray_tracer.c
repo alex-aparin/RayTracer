@@ -66,7 +66,7 @@ float compute_specular_light(const world_point light_direction, const material_t
 {
     if (material.specularity == -1)
         return 0.0f;
-    const world_point reflected_light_dir = sub(mul_by_factor(material.normal, 2.0f * scalar_product(light_direction, material.normal)), light_direction);
+    const world_point reflected_light_dir = reflect(light_direction, material.normal);
     const float cos_a = scalar_product(reflected_light_dir, mul_by_factor(view_vector, -1.0f)) / length(reflected_light_dir) / length(view_vector);
     if (cos_a <= 0.0f)
         return 0.0f;
@@ -205,17 +205,17 @@ void init_scene(scene_t* scene)
     {
         world_point sphere_center = { 0.0, -1.0f, 3.0f };
         color_t sphere_color = { 255, 0, 0 };
-        scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500);
+        scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500, 0.5f);
     }
     {
         world_point sphere_center = { 2.0, 0.0, 4.0f };
         color_t sphere_color = { 0, 0, 255 };
-        scene->graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000);
+        scene->graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000, 0.5f);
     }
     {
         world_point sphere_center = { -2.0, 0.0, 4.0f };
         color_t sphere_color = { 0, 255, 0 };
-        scene->graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10);
+        scene->graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10, 0.5f);
     }
 }
 
@@ -231,10 +231,10 @@ void destroy_scene(scene_t* scene)
     }
 }
 
-color_t trace_ray(scene_t* scene, const world_line ray)
+color_t trace_ray(scene_t* scene, const world_line ray, const float tmin, const float tmax, const int recursion_depth)
 {
     float t = 0;
-    int object_index = find_nearest_object_intersection(ray, scene, 1.0f, FLT_MAX, &t);
+    int object_index = find_nearest_object_intersection(ray, scene, tmin, tmax, &t);
     if (object_index == -1)
     {
         color_t c;
@@ -247,7 +247,11 @@ color_t trace_ray(scene_t* scene, const world_line ray)
     const material_t material = scene->graphical_objects[object_index].material_func(scene->graphical_objects[object_index].instance, surface_point);
     const float light_intensity = compute_light_intensity(scene, surface_point, material, ray.dir);
     const color_t color = mul_color_by_factor(material.color, light_intensity);
-    return color;
+    if (recursion_depth <= 0 || material.reflectivity <= 0 || material.reflectivity > 1)
+        return color;
+    const color_t reflected_color = trace_ray(scene, create_line(surface_point, reflect(mul_by_factor(ray.dir, -1.0f), material.normal)), 
+        T_EPS, FLT_MAX, recursion_depth - 1);
+    return lerp_color(color, reflected_color, material.reflectivity);
 }
 
 void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
@@ -267,7 +271,7 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             world_line line;
             zero(&line.origin);
             line.dir = p;
-            const color_t c = trace_ray(&scene, line);
+            const color_t c = trace_ray(&scene, line, 1.0f, FLT_MAX, 2);
             put_pixel(pixel_loc, c);
         }
     }
