@@ -205,17 +205,17 @@ void init_scene(scene_t* scene)
     {
         world_point sphere_center = { 0.0, -1.0f, 3.0f };
         color_t sphere_color = { 255, 0, 0 };
-        scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500, 0.5f);
+        scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500, 0.2f);
     }
     {
         world_point sphere_center = { 2.0, 0.0, 4.0f };
         color_t sphere_color = { 0, 0, 255 };
-        scene->graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000, 0.5f);
+        scene->graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000, 0.25f);
     }
     {
         world_point sphere_center = { -2.0, 0.0, 4.0f };
         color_t sphere_color = { 0, 255, 0 };
-        scene->graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10, 0.5f);
+        scene->graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10, 0.3f);
     }
 }
 
@@ -238,9 +238,9 @@ color_t trace_ray(scene_t* scene, const world_line ray, const float tmin, const 
     if (object_index == -1)
     {
         color_t c;
-        c.channels[0] = 150;
-        c.channels[1] = 150;
-        c.channels[2] = 150;
+        c.channels[0] = 0;
+        c.channels[1] = 0;
+        c.channels[2] = 0;
         return c;
     }
     const world_point surface_point = line_point(ray, t);
