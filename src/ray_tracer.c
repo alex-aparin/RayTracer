@@ -67,12 +67,12 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
     {
         world_point sphere_center = { 0.0, -1.0f, 3.0f };
         color_t sphere_color = { 255, 0, 0 };
-        graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 10);
+        graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500);
     }
     {
         world_point sphere_center = { 2.0, 0.0, 4.0f };
         color_t sphere_color = { 0, 0, 255 };
-        graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 10);
+        graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000);
     }
     {
         world_point sphere_center = { -2.0, 0.0, 4.0f };

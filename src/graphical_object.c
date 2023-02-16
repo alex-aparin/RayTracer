@@ -1,5 +1,6 @@
 #include "graphical_object.h"
 #include <stdlib.h>
+#include <math.h>
 
 typedef struct 
 {
@@ -68,7 +69,7 @@ float compute_specular_light(const world_point light_direction, const material_t
 	const float cos_a = scalar_product(reflected_light_dir, mul_by_factor(view_vector, -1.0f)) / length(reflected_light_dir) / length(view_vector);
 	if (cos_a <= 0.0f)
 		return 0.0f;
-	return pow(cos_a, material.specularity) * intensity;
+	return (float)pow(cos_a, (float)material.specularity) * intensity;
 }
 
 float ambient_light_intensity(void* instance, const world_point point, const material_t material, const world_point view_vector)
