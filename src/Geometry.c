@@ -46,6 +46,14 @@ world_point mul_by_factor(world_point const p1, float factor)
     return res;
 }
 
+world_line create_line(world_point const origin, world_point const dir)
+{
+    world_line line;
+    line.origin = origin;
+    line.dir = dir;
+    return line;
+}
+
 float length(const world_point p)
 {
     return sqrt(scalar_product(p, p));

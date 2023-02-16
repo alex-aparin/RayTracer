@@ -8,12 +8,29 @@ static float view_port_w = 1;
 static float view_port_h = 1;
 #define GRAPHICAL_OBJECTS_COUNT 3
 #define LIGHT_OBJECTS_COUNT 2
+#define T_EPS 0.00001
 
+typedef struct _scene_t scene_t;
+
+typedef float (*intensity_getter_func)(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector);
+typedef void(*destroy_light_instance_func)(void*);
 typedef struct
+{
+    void* instance;
+    intensity_getter_func intensity_func;
+    destroy_light_instance_func destroy_func;
+} light_object;
+
+light_object create_ambient_light(float intensity);
+light_object create_point_light(const world_point location, float intensity);
+light_object create_directed_light(const world_point direction, float intensity);
+int find_nearest_object_intersection(const world_line line, scene_t* scene, float tmin, float tmax, float* t);
+
+struct _scene_t
 {
     light_object light_objects[LIGHT_OBJECTS_COUNT];
     graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
-} scene_t;
+};
 
 typedef struct
 {
@@ -56,24 +73,30 @@ float compute_specular_light(const world_point light_direction, const material_t
     return (float)pow(cos_a, (float)material.specularity) * intensity;
 }
 
-float ambient_light_intensity(void* instance, const world_point point, const material_t material, const world_point view_vector)
+float ambient_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
     return ((ambient_light_object*)instance)->intensity;
 }
 
-float point_light_intensity(void* instance, const world_point point, const material_t material, const world_point view_vector)
+float point_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
     const point_light_object* const point_light = (point_light_object*)instance;
     const world_point light_dir = sub(point_light->location, point);
     const float intensity = point_light->intensity;
+    float t = 0;
+    if (find_nearest_object_intersection(create_line(point, light_dir), scene, T_EPS, FLT_MAX, &t) != -1)
+        return 0.0f;
     return compute_diffuse_light(light_dir, material, intensity) + compute_specular_light(light_dir, material, intensity, view_vector);
 }
 
-float directed_light_intensity(void* instance, const world_point point, const material_t material, const world_point view_vector)
+float directed_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
     const directed_light_object* const directed_light = (directed_light_object*)instance;
     const world_point light_dir = mul_by_factor(directed_light->direction, -1);
     const float intensity = directed_light->intensity;
+    float t = 0;
+    if (find_nearest_object_intersection(create_line(point, light_dir), scene, T_EPS, FLT_MAX, &t) != -1)
+        return 0.0f;
     return compute_diffuse_light(light_dir, material, intensity) + compute_specular_light(light_dir, material, intensity, view_vector);
 }
 
@@ -119,7 +142,7 @@ float compute_light_intensity(scene_t* scene, const world_point point, const mat
     float intensity = 0.0f;
     for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
     {
-        intensity += scene->light_objects[i].intensity_func(scene->light_objects[i].instance, point, material, view_vector);
+        intensity += scene->light_objects[i].intensity_func(scene->light_objects[i].instance, scene, point, material, view_vector);
     }
     return MIN(intensity, 1.0f);
 }

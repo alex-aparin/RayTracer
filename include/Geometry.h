@@ -57,6 +57,7 @@ world_point sum(world_point const p1, world_point const p2);
 world_point sub(world_point const p1, world_point const p2);
 color_t mul_color_by_factor(color_t const color, float factor);
 world_point mul_by_factor(world_point const p1, float factor);
+world_line create_line(world_point const origin, world_point const dir);
 float length(const world_point p);
 world_point normalize(const world_point p);
 world_point line_point(world_line line, float t);
