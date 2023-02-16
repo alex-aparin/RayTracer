@@ -11,6 +11,12 @@ static float view_port_h = 1;
 
 typedef struct
 {
+    light_object light_objects[LIGHT_OBJECTS_COUNT];
+    graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
+} scene_t;
+
+typedef struct
+{
     float intensity;
 } ambient_light_object;
 
@@ -106,14 +112,14 @@ light_object create_directed_light(const world_point direction, float intensity)
     return light;
 }
 
-float compute_light_intensity(light_object* const lights, const int count, const world_point point, const material_t material, const world_point view_vector)
+float compute_light_intensity(scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
-    if (count == 0)
+    if (LIGHT_OBJECTS_COUNT == 0)
         return 1.0f;
     float intensity = 0.0f;
-    for (int i = 0; i < count; ++i)
+    for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
     {
-        intensity += lights[i].intensity_func(lights[i].instance, point, material, view_vector);
+        intensity += scene->light_objects[i].intensity_func(scene->light_objects[i].instance, point, material, view_vector);
     }
     return MIN(intensity, 1.0f);
 }
@@ -137,13 +143,13 @@ world_point from_viewport(world_point p, const int canvas_width, const int canva
     return res;
 }
 
-int find_nearest_object_intersection(const world_line line, graphic_object* objects, int count, float tmin, float tmax, float* t)
+int find_nearest_object_intersection(const world_line line, scene_t* scene, float tmin, float tmax, float* t)
 {
     int object_index = -1;
-    for (int i = 0; i < count; ++i)
+    for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
     {
         float roots[2];
-        const int roots_count = (int)objects[i].intersect_func(objects[i].instance, &line, roots);
+        const int roots_count = (int)scene->graphical_objects[i].intersect_func(scene->graphical_objects[i].instance, &line, roots);
         if (roots_count == 0)
             continue;
         for (int root_index = 0; root_index < roots_count; ++root_index)
@@ -160,13 +166,10 @@ int find_nearest_object_intersection(const world_line line, graphic_object* obje
     return object_index;
 }
 
-void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
+void init_scene(scene_t* scene)
 {
-    if (!put_pixel)
-        return;
-    light_object light_objects[LIGHT_OBJECTS_COUNT];
     {
-        light_objects[0] = create_ambient_light(0.2f);
+        scene->light_objects[0] = create_ambient_light(0.2f);
     }
     {
         world_point location;
@@ -174,24 +177,43 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
         location.coords[0] = 2;
         location.coords[1] = 1;
         location.coords[2] = 0;
-        light_objects[1] = create_point_light(location, 0.6f);
+        scene->light_objects[1] = create_point_light(location, 0.6f);
     }
-    graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
     {
         world_point sphere_center = { 0.0, -1.0f, 3.0f };
         color_t sphere_color = { 255, 0, 0 };
-        graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500);
+        scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500);
     }
     {
         world_point sphere_center = { 2.0, 0.0, 4.0f };
         color_t sphere_color = { 0, 0, 255 };
-        graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000);
+        scene->graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000);
     }
     {
         world_point sphere_center = { -2.0, 0.0, 4.0f };
-        color_t sphere_color = { 0, 255, 0};
-        graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10);
+        color_t sphere_color = { 0, 255, 0 };
+        scene->graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10);
     }
+}
+
+void destroy_scene(scene_t* scene)
+{
+    for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
+    {
+        scene->light_objects[i].destroy_func(scene->light_objects[i].instance);
+    }
+    for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
+    {
+        scene->graphical_objects[i].destroy_func(scene->graphical_objects[i].instance);
+    }
+}
+
+void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
+{
+    if (!put_pixel)
+        return;
+    scene_t scene;
+    init_scene(&scene);
     for (int row = 0; row < canvas_height; ++row)
     {
         for (int col = 0; col < canvas_width; ++col)
@@ -204,12 +226,12 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             zero(&line.origin);
             line.dir = p;
             float t = 0;
-            int object_index = find_nearest_object_intersection(line,  graphical_objects, GRAPHICAL_OBJECTS_COUNT, 1.0f, FLT_MAX, &t);
+            int object_index = find_nearest_object_intersection(line,  &scene, 1.0f, FLT_MAX, &t);
             if (object_index != -1)
             {
                 const world_point surface_point = line_point(line, t);
-                const material_t material = graphical_objects[object_index].material_func(graphical_objects[object_index].instance, surface_point);
-                const float light_intensity = compute_light_intensity(light_objects, LIGHT_OBJECTS_COUNT, surface_point, material, p);
+                const material_t material = scene.graphical_objects[object_index].material_func(scene.graphical_objects[object_index].instance, surface_point);
+                const float light_intensity = compute_light_intensity(&scene, surface_point, material, p);
                 const color_t color = mul_color_by_factor(material.color, light_intensity);
                 put_pixel(pixel_loc, color);
                 continue;
@@ -222,12 +244,5 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
                 put_pixel(pixel_loc, c);
         }
     }
-    for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
-    {
-        light_objects[i].destroy_func(light_objects[i].instance);
-    }
-    for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
-    {
-        graphical_objects[i].destroy_func(graphical_objects[i].instance);
-    }
+    destroy_scene(&scene);
 }

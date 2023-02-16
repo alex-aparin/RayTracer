@@ -27,8 +27,6 @@ light_object create_ambient_light(float intensity);
 light_object create_point_light(const world_point location, float intensity);
 light_object create_directed_light(const world_point direction, float intensity);
 
-float compute_light_intensity(light_object* const lights, const int count, const world_point point, const material_t material, const world_point view_vector);
-
 graphic_object create_sphere_object(world_point center, float radius, color_t color_value, int specularity);
 
 #endif
