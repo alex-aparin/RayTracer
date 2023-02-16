@@ -8,7 +8,7 @@ static float view_port_w = 1;
 static float view_port_h = 1;
 #define GRAPHICAL_OBJECTS_COUNT 3
 #define LIGHT_OBJECTS_COUNT 2
-#define T_EPS 0.00001
+#define T_EPS 0.00001f
 
 typedef struct _scene_t scene_t;
 
@@ -231,6 +231,25 @@ void destroy_scene(scene_t* scene)
     }
 }
 
+color_t trace_ray(scene_t* scene, const world_line ray)
+{
+    float t = 0;
+    int object_index = find_nearest_object_intersection(ray, scene, 1.0f, FLT_MAX, &t);
+    if (object_index == -1)
+    {
+        color_t c;
+        c.channels[0] = 150;
+        c.channels[1] = 150;
+        c.channels[2] = 150;
+        return c;
+    }
+    const world_point surface_point = line_point(ray, t);
+    const material_t material = scene->graphical_objects[object_index].material_func(scene->graphical_objects[object_index].instance, surface_point);
+    const float light_intensity = compute_light_intensity(scene, surface_point, material, ray.dir);
+    const color_t color = mul_color_by_factor(material.color, light_intensity);
+    return color;
+}
+
 void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
 {
     if (!put_pixel)
@@ -248,23 +267,8 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             world_line line;
             zero(&line.origin);
             line.dir = p;
-            float t = 0;
-            int object_index = find_nearest_object_intersection(line,  &scene, 1.0f, FLT_MAX, &t);
-            if (object_index != -1)
-            {
-                const world_point surface_point = line_point(line, t);
-                const material_t material = scene.graphical_objects[object_index].material_func(scene.graphical_objects[object_index].instance, surface_point);
-                const float light_intensity = compute_light_intensity(&scene, surface_point, material, p);
-                const color_t color = mul_color_by_factor(material.color, light_intensity);
-                put_pixel(pixel_loc, color);
-                continue;
-            }
-            color_t c;
-            c.channels[0] = 150;
-            c.channels[1] = 150;
-            c.channels[2] = 150;
-            if (put_pixel)
-                put_pixel(pixel_loc, c);
+            const color_t c = trace_ray(&scene, line);
+            put_pixel(pixel_loc, c);
         }
     }
     destroy_scene(&scene);
