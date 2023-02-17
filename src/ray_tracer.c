@@ -6,7 +6,7 @@
 
 static float view_port_w = 1;
 static float view_port_h = 1;
-#define GRAPHICAL_OBJECTS_COUNT 4
+#define GRAPHICAL_OBJECTS_COUNT 2
 #define LIGHT_OBJECTS_COUNT 2
 #define T_EPS 0.00001f
 
@@ -197,28 +197,18 @@ void init_scene(scene_t* scene)
     {
         world_point location;
         zero(&location);
-        location.coords[0] = 2;
-        location.coords[1] = 1;
-        location.coords[2] = 0;
-        scene->light_objects[1] = create_point_light(location, 0.6f);
+        location.coords[0] = 0;
+        location.coords[1] = 4;
+        location.coords[2] = 4;
+        scene->light_objects[1] = create_point_light(location, 0.7f);
     }
     {
-        world_point sphere_center = { 0.0, -1.0f, 3.0f };
-        color_t sphere_color = { 255, 0, 0 };
+        world_point sphere_center = { 0.0, 1.0f, 10.0f };
+        color_t sphere_color = { 187, 164, 62 };
         scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500, 0.2f);
     }
     {
-        world_point sphere_center = { 2.0, 0.0, 4.0f };
-        color_t sphere_color = { 0, 0, 255 };
-        scene->graphical_objects[1] = create_sphere_object(sphere_center, 1, sphere_color, 1000, 0.25f);
-    }
-    {
-        world_point sphere_center = { -2.0, 0.0, 4.0f };
-        color_t sphere_color = { 0, 255, 0 };
-        scene->graphical_objects[2] = create_sphere_object(sphere_center, 1, sphere_color, 10, 0.3f);
-    }
-    {
-        scene->graphical_objects[3] = create_earth_object();
+        scene->graphical_objects[1] = create_earth_object();
     }
 }
 
