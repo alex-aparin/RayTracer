@@ -157,8 +157,8 @@ graphic_object create_mountains()
 
 	//	Countour initialization
 	float z_coord = 2;
-	mountains->countour[0].coords[0] = 0.0f; mountains->countour[0].coords[1] = 0.0f; mountains->countour[0].coords[0] = z_coord;
-	mountains->countour[1].coords[0] = 1.0f; mountains->countour[1].coords[1] = 0.0f; mountains->countour[1].coords[0] = z_coord;
-	mountains->countour[2].coords[0] = 0.0f; mountains->countour[2].coords[1] = 1.0f; mountains->countour[2].coords[0] = z_coord;
+	mountains->countour[0].coords[0] = 0.0f; mountains->countour[0].coords[1] = 0.0f; mountains->countour[0].coords[2] = z_coord;
+	mountains->countour[1].coords[0] = 1.0f; mountains->countour[1].coords[1] = 0.0f; mountains->countour[1].coords[2] = z_coord;
+	mountains->countour[2].coords[0] = 0.0f; mountains->countour[2].coords[1] = 1.0f; mountains->countour[2].coords[2] = z_coord;
 	return res;
 }
