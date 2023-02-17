@@ -138,7 +138,7 @@ intersection_result intersect_ray_with_line(const world_line* const ray, const w
 
 intersection_result intersect_line_with_poly(const world_line* const line, const world_point* vertices, const int count, float* const t)
 {
-    if (!vertices || count <= 3)
+    if (!vertices || count < 3)
         return 0;
     world_plane poly_plane;
     zero(&poly_plane.normal);

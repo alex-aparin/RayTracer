@@ -121,3 +121,44 @@ graphic_object create_earth_object()
 	res.destroy_func = destroy_base_object;
 	return res;
 }
+
+typedef struct
+{
+	world_point countour[3];
+} mountains_t;
+
+intersection_result intersect_mountains_object(void* instance, const world_line* const line, float* const roots)
+{
+	mountains_t* mountains = (mountains_t*)(instance);
+	return intersect_line_with_poly(line, mountains->countour, 3, roots);
+}
+
+material_t mountains_material_getter(void* instance, const world_point point)
+{
+	material_t material;
+	material.color.channels[0] = 50;
+	material.color.channels[1] = 150;
+	material.color.channels[2] = 00;
+	zero(&material.normal);
+	material.normal.coords[2] = -1.0f;
+	material.specularity = -1;
+	material.reflectivity = 0.0f;
+	return material;
+}
+
+graphic_object create_mountains()
+{
+	graphic_object res;
+	mountains_t* mountains = malloc(sizeof(mountains_t));
+	res.instance = mountains;
+	res.intersect_func = intersect_mountains_object;
+	res.material_func = mountains_material_getter;
+	res.destroy_func = destroy_base_object;
+
+	//	Countour initialization
+	float z_coord = 2;
+	mountains->countour[0].coords[0] = 0.0f; mountains->countour[0].coords[1] = 0.0f; mountains->countour[0].coords[0] = z_coord;
+	mountains->countour[1].coords[0] = 1.0f; mountains->countour[1].coords[1] = 0.0f; mountains->countour[1].coords[0] = z_coord;
+	mountains->countour[2].coords[0] = 0.0f; mountains->countour[2].coords[1] = 1.0f; mountains->countour[2].coords[0] = z_coord;
+	return res;
+}

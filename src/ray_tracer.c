@@ -6,7 +6,7 @@
 
 static float view_port_w = 1;
 static float view_port_h = 1;
-#define GRAPHICAL_OBJECTS_COUNT 2
+#define GRAPHICAL_OBJECTS_COUNT 3
 #define LIGHT_OBJECTS_COUNT 2
 #define T_EPS 0.00001f
 
@@ -209,6 +209,9 @@ void init_scene(scene_t* scene)
     }
     {
         scene->graphical_objects[1] = create_earth_object();
+    }
+    {
+        scene->graphical_objects[2] = create_mountains();
     }
 }
 
