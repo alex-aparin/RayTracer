@@ -1,6 +1,11 @@
 #include  <math.h>
 #include "Geometry.h"
 
+static float  det(const float a11, const float a12, const float a21, const float a22)
+{
+    return a11 * a22 - a12 * a21;
+}
+
 void zero(world_point* const p)
 {
     if (!p)
@@ -107,6 +112,56 @@ intersection_result intersect_line_with_plane(const world_line* const line, worl
     return INTERSECTED;
 }
 
+intersection_result intersect_ray_with_line(const world_line* const ray, const world_line* const line2, float* const t)
+{
+    if (!ray || !line2)
+        return NOT_INTERSECTED;
+    const float a11 = ray->dir.coords[0];
+    const float a12 = -line2->dir.coords[0];
+    const float b1 = line2->origin.coords[0] - ray->origin.coords[0];
+    const float a21 = ray->dir.coords[1];
+    const float a22 = -line2->dir.coords[1];
+    const float b2 = line2->origin.coords[1] - ray->origin.coords[1];
+    const float main_det = det(a11, a12, a21, a22);
+    if (main_det != 0.0f)
+    {
+        const float t1 = det(b1, a12, b2, a22) / main_det;
+        const float t2 = det(a11, b1, a21, b2) / main_det;
+        if (t1 >= 0.0f && 0.0f <= t2 && t2 <= 1.0f)
+        {
+            *t = t1;
+            return INTERSECTED;
+        }
+    }
+    return NOT_INTERSECTED;
+}
+
+intersection_result intersect_line_with_poly(const world_line* const line, const world_point* vertices, const int count, float* const t)
+{
+    if (!vertices || count <= 3)
+        return 0;
+    world_plane poly_plane;
+    zero(&poly_plane.normal);
+    poly_plane.D = vertices[0].coords[3];
+    poly_plane.normal.coords[2] = 1.0f;
+    if (!intersect_line_with_plane(line, &poly_plane, t))
+        return NOT_INTERSECTED;
+    world_line ray;
+    zero(&ray.dir);
+    ray.dir.coords[0] = 1.0f;
+    ray.origin = line_point(*line, *t);
+    float temp_t = 0;
+    int res = 0;
+    for (int i = 0; i < count; ++i)
+    {
+        world_line segment;
+        segment.origin = vertices[i];
+        segment.dir = sub(vertices[(i + 1) % count], vertices[i]);
+        if (intersect_ray_with_line(&ray, &segment, &temp_t))
+            ++res;
+    }
+    return res % 2;
+}
 int solve_quadratic(float a, float b, float c, float* const t)
 {
     const float d = b * b - 4.0f * a * c;

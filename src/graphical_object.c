@@ -100,8 +100,8 @@ material_t earth_material_getter(void* instance, const world_point point)
 	}
 	earth_object_t* earth = (earth_object_t*)(instance);
 	material.normal = earth->plane.normal;
-	material.specularity = -1;
-	material.reflectivity = 0.0f;
+	material.specularity = 500;
+	material.reflectivity = 0.5f;
 	return material;
 }
 

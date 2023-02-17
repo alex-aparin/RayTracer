@@ -66,6 +66,8 @@ world_point line_point(world_line line, float t);
 float scalar_product(world_point const p1, world_point const p2);
 intersection_result intersect_line_with_sphere(const world_line* const line, world_sphere* const sphere, float* const t);
 intersection_result intersect_line_with_plane(const world_line* const line, world_plane* const plane, float* const t);
+intersection_result intersect_ray_with_line(const world_line* const ray, const world_line* const line2, float* const t);
+intersection_result intersect_line_with_poly(const world_line* const line, const world_point* vertices, const int count, float* const t);
 int solve_quadratic(float a, float b, float c, float* const t);
 color_t lerp_color(const color_t lhs, const color_t rhs, const float t);
 
