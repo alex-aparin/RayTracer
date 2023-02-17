@@ -142,13 +142,14 @@ intersection_result intersect_line_with_poly(const world_line* const line, const
         return 0;
     world_plane poly_plane;
     zero(&poly_plane.normal);
-    poly_plane.D = vertices[0].coords[2];
+    poly_plane.D = -vertices[0].coords[2];
     poly_plane.normal.coords[2] = 1.0f;
     if (!intersect_line_with_plane(line, &poly_plane, t))
         return NOT_INTERSECTED;
     world_line ray;
     zero(&ray.dir);
-    ray.dir.coords[0] = 1.0f;
+    ray.dir.coords[0] = 0.6f;
+    ray.dir.coords[1] = 1.0f;
     ray.origin = line_point(*line, *t);
     float temp_t = 0;
     int res = 0;

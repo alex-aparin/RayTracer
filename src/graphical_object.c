@@ -75,8 +75,8 @@ intersection_result intersect_earth_object(void* instance, const world_line* con
 
 material_t earth_material_getter(void* instance, const world_point point)
 {
-	float line_width = 0.05;
-	float quad_width = 0.4;
+	float line_width = 0.02;
+	float quad_width = 0.2;
 	const float width_channel = fabs(point.coords[0]);
 	const float height_channel = point.coords[2];
 	float relative_w = width_channel / (quad_width + line_width);
@@ -87,16 +87,20 @@ material_t earth_material_getter(void* instance, const world_point point)
 	if (relative_h > (line_width / (quad_width + line_width)) && relative_w > (line_width / (quad_width + line_width)))
 	{
 		//	cell content
-		material.color.channels[0] = 50;
-		material.color.channels[1] = 50;
-		material.color.channels[2] = 50;
+		color_t cell_color = { 18, 0, 98 };
+		material.color = cell_color;
+		//material.color.channels[0] = 50;
+		//material.color.channels[1] = 50;
+		//material.color.channels[2] = 50;
 	}
 	else
 	{
 		//	border
-		material.color.channels[0] = 177;
+		color_t border_color = { 209, 0, 133 };
+		material.color = border_color;
+		/*material.color.channels[0] = 177;
 		material.color.channels[1] = 115;
-		material.color.channels[2] = 242;
+		material.color.channels[2] = 242;*/
 	}
 	earth_object_t* earth = (earth_object_t*)(instance);
 	material.normal = earth->plane.normal;
@@ -112,7 +116,7 @@ graphic_object create_earth_object()
 	earth->color.channels[0] = 150;
 	earth->color.channels[1] = 150;
 	earth->color.channels[2] = 150;
-	earth->plane.D = 1;
+	earth->plane.D = 0.5;
 	zero(&earth->plane.normal);
 	earth->plane.normal.coords[1] = 1.0f;
 	res.instance = earth;
@@ -122,23 +126,23 @@ graphic_object create_earth_object()
 	return res;
 }
 
+#define MOUNTAINS_VERTICES_COUNT 7
 typedef struct
 {
-	world_point countour[3];
+	world_point countour[MOUNTAINS_VERTICES_COUNT];
 } mountains_t;
 
 intersection_result intersect_mountains_object(void* instance, const world_line* const line, float* const roots)
 {
 	mountains_t* mountains = (mountains_t*)(instance);
-	return intersect_line_with_poly(line, mountains->countour, 3, roots);
+	return intersect_line_with_poly(line, mountains->countour, MOUNTAINS_VERTICES_COUNT, roots);
 }
 
 material_t mountains_material_getter(void* instance, const world_point point)
 {
 	material_t material;
-	material.color.channels[0] = 50;
-	material.color.channels[1] = 150;
-	material.color.channels[2] = 00;
+	color_t color = { 30, 0, 71 };
+	material.color = color;
 	zero(&material.normal);
 	material.normal.coords[2] = -1.0f;
 	material.specularity = -1;
@@ -154,11 +158,16 @@ graphic_object create_mountains()
 	res.intersect_func = intersect_mountains_object;
 	res.material_func = mountains_material_getter;
 	res.destroy_func = destroy_base_object;
-
+	
 	//	Countour initialization
-	float z_coord = 2;
-	mountains->countour[0].coords[0] = 0.0f; mountains->countour[0].coords[1] = 0.0f; mountains->countour[0].coords[2] = z_coord;
-	mountains->countour[1].coords[0] = 1.0f; mountains->countour[1].coords[1] = 0.0f; mountains->countour[1].coords[2] = z_coord;
-	mountains->countour[2].coords[0] = 0.0f; mountains->countour[2].coords[1] = 1.0f; mountains->countour[2].coords[2] = z_coord;
+	float z_coord = 10;
+	mountains->countour[0].coords[0] = -10.0f; mountains->countour[0].coords[1] = -0.51f; mountains->countour[0].coords[2] = z_coord;
+	mountains->countour[1].coords[0] = 10.0f; mountains->countour[1].coords[1] = -0.51f; mountains->countour[1].coords[2] = z_coord;
+	mountains->countour[2].coords[0] = 5.0f; mountains->countour[2].coords[1] = 0.7f; mountains->countour[2].coords[2] = z_coord;
+	mountains->countour[3].coords[0] = 1.6f; mountains->countour[3].coords[1] = -0.1f; mountains->countour[3].coords[2] = z_coord;
+	mountains->countour[4].coords[0] = 0.3f; mountains->countour[4].coords[1] = 0.1f; mountains->countour[4].coords[2] = z_coord;
+	mountains->countour[5].coords[0] = -1.1f; mountains->countour[5].coords[1] = -0.1f; mountains->countour[5].coords[2] = z_coord;
+	mountains->countour[6].coords[0] = -10.0f; mountains->countour[6].coords[1] = -0.3f; mountains->countour[6].coords[2] = z_coord;
+
 	return res;
 }

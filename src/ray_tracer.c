@@ -198,12 +198,12 @@ void init_scene(scene_t* scene)
         world_point location;
         zero(&location);
         location.coords[0] = 0;
-        location.coords[1] = 4;
-        location.coords[2] = 4;
-        scene->light_objects[1] = create_point_light(location, 0.7f);
+        location.coords[1] = 2;
+        location.coords[2] = 7;
+        scene->light_objects[1] = create_point_light(location, 0.8f);
     }
     {
-        world_point sphere_center = { 0.0, 1.0f, 10.0f };
+        world_point sphere_center = { 0.0, 0.5f, 14.0f };
         color_t sphere_color = { 187, 164, 62 };
         scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500, 0.2f);
     }
@@ -233,10 +233,7 @@ color_t trace_ray(scene_t* scene, const world_line ray, const float tmin, const 
     int object_index = find_nearest_object_intersection(ray, scene, tmin, tmax, &t);
     if (object_index == -1)
     {
-        color_t c;
-        c.channels[0] = 0;
-        c.channels[1] = 0;
-        c.channels[2] = 0;
+        color_t c = { 0, 0, 0 };
         return c;
     }
     const world_point surface_point = line_point(ray, t);
