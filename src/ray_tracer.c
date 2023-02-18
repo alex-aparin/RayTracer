@@ -1,7 +1,5 @@
 #include "ray_tracer.h"
 #include <float.h>
-#include <math.h>
-#include <stdlib.h>
 
 static float view_port_w = 1;
 static float view_port_h = 1;
@@ -42,9 +40,9 @@ world_point sub(world_point const p1, world_point const p2)
 color_t mul_color_by_factor(color_t const color, float factor)
 {
     color_t res = color;
-    res.channels[0] = RAY_TRACER_MIN(255, res.channels[0] * factor);
-    res.channels[1] = RAY_TRACER_MIN(255, res.channels[1] * factor);
-    res.channels[2] = RAY_TRACER_MIN(255, res.channels[2] * factor);
+    res.channels[0] = RAY_TRACER_MIN(255, (unsigned char)lroundf(res.channels[0] * factor));
+    res.channels[1] = RAY_TRACER_MIN(255, (unsigned char)lroundf(res.channels[1] * factor));
+    res.channels[2] = RAY_TRACER_MIN(255, (unsigned char)lroundf(res.channels[2] * factor));
     return res;
 }
 
@@ -72,7 +70,7 @@ world_line create_line(world_point const origin, world_point const dir)
 
 float length(const world_point p)
 {
-    return sqrt(scalar_product(p, p));
+    return sqrtf(scalar_product(p, p));
 }
 
 world_point normalize(const world_point p)
@@ -188,13 +186,13 @@ int solve_quadratic(float a, float b, float c, float* const t)
 color_t lerp_color(const color_t lhs, const color_t rhs, const float t)
 {
     color_t res;
-    res.channels[0] = lhs.channels[0] + t * (rhs.channels[0] - lhs.channels[0]);
-    res.channels[1] = lhs.channels[1] + t * (rhs.channels[1] - lhs.channels[1]);
-    res.channels[2] = lhs.channels[2] + t * (rhs.channels[2] - lhs.channels[2]);
+    res.channels[0] = lhs.channels[0] + (unsigned char)lroundf(t * (rhs.channels[0] - lhs.channels[0]));
+    res.channels[1] = lhs.channels[1] + (unsigned char)lroundf(t * (rhs.channels[1] - lhs.channels[1]));
+    res.channels[2] = lhs.channels[2] + (unsigned char)lroundf(t * (rhs.channels[2] - lhs.channels[2]));
     return res;
 }
 
-int find_nearest_object_intersection(const world_line line, scene_t* scene, float tmin, float tmax, float* t);
+static int find_nearest_object_intersection(const world_line line, scene_t* scene, float tmin, float tmax, float* t);
 
 
 typedef struct
@@ -214,12 +212,12 @@ typedef struct
     float intensity;
 } directed_light_object;
 
-void destroy_light_object(void* light_object)
+static void destroy_light_object(void* light_object)
 {
     free(light_object);
 }
 
-float compute_diffuse_light(const world_point light_direction, const material_t material, const float intensity)
+static float compute_diffuse_light(const world_point light_direction, const material_t material, const float intensity)
 {
     const float cos_a = scalar_product(material.normal, light_direction) / length(material.normal) / length(light_direction);
     if (cos_a <= 0.0f)
@@ -227,7 +225,7 @@ float compute_diffuse_light(const world_point light_direction, const material_t 
     return cos_a * intensity;
 }
 
-float compute_specular_light(const world_point light_direction, const material_t material, const float intensity, const world_point view_vector)
+static float compute_specular_light(const world_point light_direction, const material_t material, const float intensity, const world_point view_vector)
 {
     if (material.specularity == -1)
         return 0.0f;
@@ -238,12 +236,12 @@ float compute_specular_light(const world_point light_direction, const material_t
     return (float)pow(cos_a, (float)material.specularity) * intensity;
 }
 
-float ambient_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
+static float ambient_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
     return ((ambient_light_object*)instance)->intensity;
 }
 
-float point_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
+static float point_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
     const point_light_object* const point_light = (point_light_object*)instance;
     const world_point light_dir = sub(point_light->location, point);
@@ -254,7 +252,7 @@ float point_light_intensity(void* instance, scene_t* scene, const world_point po
     return compute_diffuse_light(light_dir, material, intensity) + compute_specular_light(light_dir, material, intensity, view_vector);
 }
 
-float directed_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
+static float directed_light_intensity(void* instance, scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
     const directed_light_object* const directed_light = (directed_light_object*)instance;
     const world_point light_dir = mul_by_factor(directed_light->direction, -1);
@@ -300,7 +298,7 @@ light_object create_directed_light(const world_point direction, float intensity)
     return light;
 }
 
-float compute_light_intensity(scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
+static float compute_light_intensity(scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
     if (scene->lights_count == 0)
         return 1.0f;
@@ -313,7 +311,7 @@ float compute_light_intensity(scene_t* scene, const world_point point, const mat
 }
 
 
-world_point viewport_point(screen_point p, const int canvas_width, const int canvas_height)
+static world_point viewport_point(screen_point p, const int canvas_width, const int canvas_height)
 {
     world_point res;
     res.coords[0] = (p.coords[0] - canvas_width / 2.0f);
@@ -322,7 +320,7 @@ world_point viewport_point(screen_point p, const int canvas_width, const int can
     return res;
 }
 
-world_point from_viewport(world_point p, const int canvas_width, const int canvas_height)
+static world_point from_viewport(world_point p, const int canvas_width, const int canvas_height)
 {
     world_point res;
     res.coords[0] = p.coords[0] * view_port_w / canvas_width;
@@ -331,7 +329,7 @@ world_point from_viewport(world_point p, const int canvas_width, const int canva
     return res;
 }
 
-int find_nearest_object_intersection(const world_line line, scene_t* scene, float tmin, float tmax, float* t)
+static int find_nearest_object_intersection(const world_line line, scene_t* scene, float tmin, float tmax, float* t)
 {
     int object_index = -1;
     for (int i = 0; i < scene->objects_count; ++i)
@@ -354,7 +352,7 @@ int find_nearest_object_intersection(const world_line line, scene_t* scene, floa
     return object_index;
 }
 
-color_t trace_ray(scene_t* scene, const world_line ray, const float tmin, const float tmax, const int recursion_depth)
+static color_t trace_ray(scene_t* scene, const world_line ray, const float tmin, const float tmax, const int recursion_depth)
 {
     float t = 0;
     int object_index = find_nearest_object_intersection(ray, scene, tmin, tmax, &t);

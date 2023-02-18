@@ -1,7 +1,11 @@
 #ifndef RAY_TRACER_H_INCLUDED__
 #define RAY_TRACER_H_INCLUDED__
 
+#include <stdlib.h>
+#include <math.h>
+
 #define RAY_TRACER_MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+
 typedef enum
 {
     NOT_INTERSECTED = 0x0,

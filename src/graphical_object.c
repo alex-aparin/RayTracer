@@ -1,11 +1,10 @@
 #include "ray_tracer.h"
-#include <stdlib.h>
-#include <math.h>
 
 #define GRAPHICAL_OBJECTS_COUNT 3
 #define LIGHT_OBJECTS_COUNT 2
-light_object light_objects[LIGHT_OBJECTS_COUNT];
-graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
+
+static light_object light_objects[LIGHT_OBJECTS_COUNT];
+static graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
 
 typedef struct 
 {
@@ -16,13 +15,13 @@ typedef struct
 } SphereObject;
 
 
-intersection_result intersect_sphere_object(void* instance, const world_line* const line, float* const roots)
+static intersection_result intersect_sphere_object(void* instance, const world_line* const line, float* const roots)
 {
 	SphereObject* sphere_object = (SphereObject*)(instance);
 	return intersect_line_with_sphere(line, &sphere_object->sphere, roots);
 }
 
-material_t sphere_material_getter(void* instance, const world_point point)
+static material_t sphere_material_getter(void* instance, const world_point point)
 {
 	SphereObject* sphere_object = (SphereObject*)(instance);
 	material_t material;
@@ -45,12 +44,12 @@ material_t sphere_material_getter(void* instance, const world_point point)
 	return material;
 }
 
-void destroy_base_object(void* base_graphical_object)
+static void destroy_base_object(void* base_graphical_object)
 {
 	free(base_graphical_object);
 }
 
-graphic_object create_sphere_object(world_point center, float radius, color_t color, int specularity, float reflectivity)
+static graphic_object create_sphere_object(world_point center, float radius, color_t color, int specularity, float reflectivity)
 {
 	graphic_object res;
 	SphereObject* sphere_object = malloc(sizeof(SphereObject));
@@ -72,22 +71,22 @@ typedef struct
 	color_t color;
 } earth_object_t;
 
-intersection_result intersect_earth_object(void* instance, const world_line* const line, float* const roots)
+static intersection_result intersect_earth_object(void* instance, const world_line* const line, float* const roots)
 {
 	earth_object_t* earth = (earth_object_t*)(instance);
 	return intersect_line_with_plane(line, &earth->plane, roots);
 }
 
-material_t earth_material_getter(void* instance, const world_point point)
+static material_t earth_material_getter(void* instance, const world_point point)
 {
-	float line_width = 0.02;
-	float quad_width = 0.2;
-	const float width_channel = fabs(point.coords[0]);
+	const float line_width = 0.02f;
+	const float quad_width = 0.2f;
+	const float width_channel = (float)fabs(point.coords[0]);
 	const float height_channel = point.coords[2];
 	float relative_w = width_channel / (quad_width + line_width);
-	relative_w -= trunc(relative_w);
+	relative_w -= truncf(relative_w);
 	float relative_h = height_channel / (quad_width + line_width);
-	relative_h -= trunc(relative_h);
+	relative_h -= truncf(relative_h);
 	material_t material;
 	if (relative_h > (line_width / (quad_width + line_width)) && relative_w > (line_width / (quad_width + line_width)))
 	{
@@ -114,7 +113,7 @@ material_t earth_material_getter(void* instance, const world_point point)
 	return material;
 }
 
-graphic_object create_earth_object()
+static graphic_object create_earth_object()
 {
 	graphic_object res;
 	earth_object_t* earth = malloc(sizeof(earth_object_t));
@@ -137,13 +136,13 @@ typedef struct
 	world_point countour[MOUNTAINS_VERTICES_COUNT];
 } mountains_t;
 
-intersection_result intersect_mountains_object(void* instance, const world_line* const line, float* const roots)
+static intersection_result intersect_mountains_object(void* instance, const world_line* const line, float* const roots)
 {
 	mountains_t* mountains = (mountains_t*)(instance);
 	return intersect_line_with_poly(line, mountains->countour, MOUNTAINS_VERTICES_COUNT, roots);
 }
 
-material_t mountains_material_getter(void* instance, const world_point point)
+static material_t mountains_material_getter(void* instance, const world_point point)
 {
 	material_t material;
 	color_t color = { 30, 0, 71 };
@@ -155,7 +154,7 @@ material_t mountains_material_getter(void* instance, const world_point point)
 	return material;
 }
 
-graphic_object create_mountains()
+static graphic_object create_mountains()
 {
 	graphic_object res;
 	mountains_t* mountains = malloc(sizeof(mountains_t));
