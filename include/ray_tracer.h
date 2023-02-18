@@ -97,12 +97,12 @@ light_object create_ambient_light(float intensity);
 light_object create_point_light(const world_point location, float intensity);
 light_object create_directed_light(const world_point direction, float intensity);
 
-#define GRAPHICAL_OBJECTS_COUNT 3
-#define LIGHT_OBJECTS_COUNT 2
 struct _scene_t
 {
-	light_object light_objects[LIGHT_OBJECTS_COUNT];
-	graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
+	light_object* light_objects;
+    int lights_count;
+	graphic_object* graphical_objects;
+    int objects_count;
 };
 
 void init_scene(scene_t* scene);

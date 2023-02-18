@@ -302,10 +302,10 @@ light_object create_directed_light(const world_point direction, float intensity)
 
 float compute_light_intensity(scene_t* scene, const world_point point, const material_t material, const world_point view_vector)
 {
-    if (LIGHT_OBJECTS_COUNT == 0)
+    if (scene->lights_count == 0)
         return 1.0f;
     float intensity = 0.0f;
-    for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
+    for (int i = 0; i < scene->lights_count; ++i)
     {
         intensity += scene->light_objects[i].intensity_func(scene->light_objects[i].instance, scene, point, material, view_vector);
     }
@@ -334,7 +334,7 @@ world_point from_viewport(world_point p, const int canvas_width, const int canva
 int find_nearest_object_intersection(const world_line line, scene_t* scene, float tmin, float tmax, float* t)
 {
     int object_index = -1;
-    for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
+    for (int i = 0; i < scene->objects_count; ++i)
     {
         float roots[2];
         const int roots_count = (int)scene->graphical_objects[i].intersect_func(scene->graphical_objects[i].instance, &line, roots);

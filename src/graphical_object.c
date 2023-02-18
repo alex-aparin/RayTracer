@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define GRAPHICAL_OBJECTS_COUNT 3
+#define LIGHT_OBJECTS_COUNT 2
+light_object light_objects[LIGHT_OBJECTS_COUNT];
+graphic_object graphical_objects[GRAPHICAL_OBJECTS_COUNT];
+
 typedef struct 
 {
 	world_sphere sphere;
@@ -174,8 +179,13 @@ graphic_object create_mountains()
 
 void init_scene(scene_t* scene)
 {
+	scene->light_objects = light_objects;
+	scene->lights_count = LIGHT_OBJECTS_COUNT;
+	scene->graphical_objects = graphical_objects;
+	scene->objects_count = GRAPHICAL_OBJECTS_COUNT;
+
 	{
-		scene->light_objects[0] = create_ambient_light(0.2f);
+		light_objects[0] = create_ambient_light(0.2f);
 	}
 	{
 		world_point location;
@@ -183,29 +193,33 @@ void init_scene(scene_t* scene)
 		location.coords[0] = 0;
 		location.coords[1] = 2;
 		location.coords[2] = 7;
-		scene->light_objects[1] = create_point_light(location, 0.8f);
+		light_objects[1] = create_point_light(location, 0.8f);
 	}
 	{
 		world_point sphere_center = { 0.0, 0.5f, 14.0f };
 		color_t sphere_color = { 187, 164, 62 };
-		scene->graphical_objects[0] = create_sphere_object(sphere_center, 1.5, sphere_color, 500, 0.2f);
+		graphical_objects[0] = create_sphere_object(sphere_center, 1.5, sphere_color, 500, 0.2f);
 	}
 	{
-		scene->graphical_objects[1] = create_earth_object();
+		graphical_objects[1] = create_earth_object();
 	}
 	{
-		scene->graphical_objects[2] = create_mountains();
+		graphical_objects[2] = create_mountains();
 	}
 }
 
 void destroy_scene(scene_t* scene)
 {
+	scene->objects_count = 0;
+	scene->graphical_objects = 0;
+	scene->lights_count = 0;
+	scene->light_objects = 0;
 	for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
 	{
-		scene->light_objects[i].destroy_func(scene->light_objects[i].instance);
+		light_objects[i].destroy_func(light_objects[i].instance);
 	}
 	for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
 	{
-		scene->graphical_objects[i].destroy_func(scene->graphical_objects[i].instance);
+		graphical_objects[i].destroy_func(graphical_objects[i].instance);
 	}
 }
