@@ -1,4 +1,4 @@
-#include "graphical_object.h"
+#include "ray_tracer.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -170,4 +170,42 @@ graphic_object create_mountains()
 	mountains->countour[6].coords[0] = -10.0f; mountains->countour[6].coords[1] = -0.3f; mountains->countour[6].coords[2] = z_coord;
 
 	return res;
+}
+
+void init_scene(scene_t* scene)
+{
+	{
+		scene->light_objects[0] = create_ambient_light(0.2f);
+	}
+	{
+		world_point location;
+		zero(&location);
+		location.coords[0] = 0;
+		location.coords[1] = 2;
+		location.coords[2] = 7;
+		scene->light_objects[1] = create_point_light(location, 0.8f);
+	}
+	{
+		world_point sphere_center = { 0.0, 0.5f, 14.0f };
+		color_t sphere_color = { 187, 164, 62 };
+		scene->graphical_objects[0] = create_sphere_object(sphere_center, 1.5, sphere_color, 500, 0.2f);
+	}
+	{
+		scene->graphical_objects[1] = create_earth_object();
+	}
+	{
+		scene->graphical_objects[2] = create_mountains();
+	}
+}
+
+void destroy_scene(scene_t* scene)
+{
+	for (int i = 0; i < LIGHT_OBJECTS_COUNT; ++i)
+	{
+		scene->light_objects[i].destroy_func(scene->light_objects[i].instance);
+	}
+	for (int i = 0; i < GRAPHICAL_OBJECTS_COUNT; ++i)
+	{
+		scene->graphical_objects[i].destroy_func(scene->graphical_objects[i].instance);
+	}
 }
