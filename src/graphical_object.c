@@ -146,7 +146,7 @@ material_t mountains_material_getter(void* instance, const world_point point)
 	zero(&material.normal);
 	material.normal.coords[2] = -1.0f;
 	material.specularity = -1;
-	material.reflectivity = 0.0f;
+	material.reflectivity = 0.5f;
 	return material;
 }
 

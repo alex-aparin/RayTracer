@@ -205,7 +205,7 @@ void init_scene(scene_t* scene)
     {
         world_point sphere_center = { 0.0, 0.5f, 14.0f };
         color_t sphere_color = { 187, 164, 62 };
-        scene->graphical_objects[0] = create_sphere_object(sphere_center, 1, sphere_color, 500, 0.2f);
+        scene->graphical_objects[0] = create_sphere_object(sphere_center, 1.5, sphere_color, 500, 0.2f);
     }
     {
         scene->graphical_objects[1] = create_earth_object();
