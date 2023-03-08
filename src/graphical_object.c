@@ -25,8 +25,8 @@ static material_t sphere_material_getter(void* instance, const world_point point
 {
 	SphereObject* sphere_object = (SphereObject*)(instance);
 	material_t material;
-	color_t top_color = { 255, 247, 196 };
-	color_t bottom_color = { 207, 28, 83 };
+	color_t top_color = {{ 255, 247, 196 }};
+	color_t bottom_color = {{ 207, 28, 83 }};
 	float t = (sphere_object->sphere.center.coords[1] + sphere_object->sphere.radius - point.coords[1]) / 2 / sphere_object->sphere.radius;
 	material.color = lerp_color(top_color, bottom_color, t);
 	material.normal = normalize(sub(point, sphere_object->sphere.center));
@@ -91,7 +91,7 @@ static material_t earth_material_getter(void* instance, const world_point point)
 	if (relative_h > (line_width / (quad_width + line_width)) && relative_w > (line_width / (quad_width + line_width)))
 	{
 		//	cell content
-		color_t cell_color = { 18, 0, 98 };
+		color_t cell_color = {{ 18, 0, 98 }};
 		material.color = cell_color;
 		//material.color.channels[0] = 50;
 		//material.color.channels[1] = 50;
@@ -100,7 +100,7 @@ static material_t earth_material_getter(void* instance, const world_point point)
 	else
 	{
 		//	border
-		color_t border_color = { 209, 0, 133 };
+		color_t border_color = {{ 209, 0, 133 }};
 		material.color = border_color;
 		/*material.color.channels[0] = 177;
 		material.color.channels[1] = 115;
@@ -145,7 +145,7 @@ static intersection_result intersect_mountains_object(void* instance, const worl
 static material_t mountains_material_getter(void* instance, const world_point point)
 {
 	material_t material;
-	color_t color = { 30, 0, 71 };
+	color_t color = {{ 30, 0, 71 }};
 	material.color = color;
 	zero(&material.normal);
 	material.normal.coords[2] = -1.0f;
@@ -195,8 +195,8 @@ void init_scene(scene_t* scene)
 		light_objects[1] = create_point_light(location, 0.8f);
 	}
 	{
-		world_point sphere_center = { 0.0, 0.5f, 14.0f };
-		color_t sphere_color = { 187, 164, 62 };
+		world_point sphere_center = {{ 0.0, 0.5f, 14.0f }};
+		color_t sphere_color = {{ 187, 164, 62 }};
 		graphical_objects[0] = create_sphere_object(sphere_center, 1.5, sphere_color, 500, 0.2f);
 	}
 	{

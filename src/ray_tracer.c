@@ -358,7 +358,7 @@ static color_t trace_ray(scene_t* scene, const world_line ray, const float tmin,
     int object_index = find_nearest_object_intersection(ray, scene, tmin, tmax, &t);
     if (object_index == -1)
     {
-        color_t c = { 0, 0, 0 };
+        color_t c = {{ 0, 0, 0 }};
         return c;
     }
     const world_point surface_point = line_point(ray, t);

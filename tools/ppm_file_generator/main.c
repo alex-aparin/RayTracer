@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+/*#define _CRT_SECURE_NO_WARNINGS
 #include <stdlib.h>
 #include <stdio.h>
 #include "ray_tracer.h"
@@ -12,7 +12,7 @@ void put_pixel_func(screen_point p, color_t pixel)
 {
     image[p.coords[1]][p.coords[0]] = pixel;
 }
-
+*/
 int main(void)
 {   
     trace(IMAGE_WIDTH, IMAGE_HEIGHT, put_pixel_func);
