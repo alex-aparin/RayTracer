@@ -372,12 +372,10 @@ static color_t trace_ray(scene_t* scene, const world_line ray, const float tmin,
     return lerp_color(color, reflected_color, material.reflectivity);
 }
 
-void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
+void trace(scene_t* scene, const int canvas_width, const int canvas_height, put_pixel_callback put_pixel)
 {
-    if (!put_pixel)
+    if (!scene || !put_pixel)
         return;
-    scene_t scene;
-    init_scene(&scene);
     for (int row = 0; row < canvas_height; ++row)
     {
         for (int col = 0; col < canvas_width; ++col)
@@ -389,9 +387,8 @@ void trace(const int canvas_width, const int canvas_height, put_pixel_callback p
             world_line line;
             zero(&line.origin);
             line.dir = p;
-            const color_t c = trace_ray(&scene, line, 1.0f, FLT_MAX, 2);
+            const color_t c = trace_ray(scene, line, 1.0f, FLT_MAX, 2);
             put_pixel(pixel_loc, c);
         }
     }
-    destroy_scene(&scene);
 }

@@ -109,10 +109,6 @@ struct _scene_t
     int objects_count;
 };
 
-void init_scene(scene_t* scene);
-void destroy_scene(scene_t* scene);
-
-
-void trace(const int canvas_width, const int canvas_height, put_pixel_callback put_pixel);
+void trace(scene_t* scene, const int canvas_width, const int canvas_height, put_pixel_callback put_pixel);
 
 #endif

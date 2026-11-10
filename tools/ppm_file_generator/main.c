@@ -1,7 +1,8 @@
-/*#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdlib.h>
 #include <stdio.h>
 #include "ray_tracer.h"
+#include "demo.h"
 
 #define IMAGE_WIDTH 500
 #define IMAGE_HEIGHT 500
@@ -12,13 +13,16 @@ void put_pixel_func(screen_point p, color_t pixel)
 {
     image[p.coords[1]][p.coords[0]] = pixel;
 }
-*/
+
 int main(void)
-{   
-    trace(IMAGE_WIDTH, IMAGE_HEIGHT, put_pixel_func);
+{
+    scene_t scene;
+    demo_scene_init(&scene);
+    trace(&scene, IMAGE_WIDTH, IMAGE_HEIGHT, put_pixel_func);
+    demo_scene_destroy(&scene);
     {
         int i, j;
-        FILE* fp = fopen("first.ppm", "w"); /* b - binary mode */
+        FILE* fp = fopen("ray_traced_scene.ppm", "w"); /* b - binary mode */
         fprintf(fp, "P3\n%d %d\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
         for (j = 0; j < IMAGE_HEIGHT; ++j)
         {
