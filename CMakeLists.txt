@@ -27,3 +27,9 @@ target_link_libraries(chess_balls_scene PUBLIC ray_tracer)
 
 add_executable(ppm_file_generator tools/ppm_file_generator/main.c)
 target_link_libraries(ppm_file_generator PRIVATE demo_scene chess_balls_scene)
+
+# Tests
+enable_testing()
+add_executable(smoke_test tests/smoke_test.c)
+target_link_libraries(smoke_test PRIVATE demo_scene chess_balls_scene)
+add_test(NAME smoke_test COMMAND smoke_test)

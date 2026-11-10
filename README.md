@@ -77,6 +77,14 @@ This produces a `ray_tracer` static library and the `ppm_file_generator` executa
 
 To use the tracer in your own app, link against the `ray_tracer` target and pass your own `put_pixel` callback to `trace()`.
 
+## Tests
+
+```sh
+ctest --test-dir build --output-on-failure
+```
+
+The smoke test (`tests/smoke_test.c`) covers vector math, quadratic solving and sphere intersection, then renders both scenes into a small buffer and checks the output is non-empty and deterministic.
+
 ## License
 
 Not specified.
