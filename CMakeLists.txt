@@ -20,5 +20,10 @@ add_library(demo_scene STATIC scenes/demo.c)
 target_include_directories(demo_scene PUBLIC scenes)
 target_link_libraries(demo_scene PUBLIC ray_tracer)
 
+# Chessboard scene: mirror balls on a checkerboard floor.
+add_library(chess_balls_scene STATIC scenes/chess_balls.c)
+target_include_directories(chess_balls_scene PUBLIC scenes)
+target_link_libraries(chess_balls_scene PUBLIC ray_tracer)
+
 add_executable(ppm_file_generator tools/ppm_file_generator/main.c)
-target_link_libraries(ppm_file_generator PRIVATE demo_scene)
+target_link_libraries(ppm_file_generator PRIVATE demo_scene chess_balls_scene)

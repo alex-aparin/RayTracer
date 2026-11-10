@@ -4,6 +4,7 @@
 static float view_port_w = 1;
 static float view_port_h = 1;
 #define T_EPS 0.00001f
+#define ANTIALIASING_SAMPLES 3
 
 static float  det(const float a11, const float a12, const float a21, const float a22)
 {
@@ -247,7 +248,7 @@ static float point_light_intensity(void* instance, scene_t* scene, const world_p
     const world_point light_dir = sub(point_light->location, point);
     const float intensity = point_light->intensity;
     float t = 0;
-    if (find_nearest_object_intersection(create_line(point, light_dir), scene, T_EPS, FLT_MAX, &t) != -1)
+    if (find_nearest_object_intersection(create_line(point, light_dir), scene, T_EPS, 1.0f, &t) != -1)
         return 0.0f;
     return compute_diffuse_light(light_dir, material, intensity) + compute_specular_light(light_dir, material, intensity, view_vector);
 }
@@ -311,11 +312,11 @@ static float compute_light_intensity(scene_t* scene, const world_point point, co
 }
 
 
-static world_point viewport_point(screen_point p, const int canvas_width, const int canvas_height)
+static world_point viewport_point(float x, float y, const int canvas_width, const int canvas_height)
 {
     world_point res;
-    res.coords[0] = (p.coords[0] - canvas_width / 2.0f);
-    res.coords[1] = (canvas_height / 2.0f - p.coords[1]);
+    res.coords[0] = (x - canvas_width / 2.0f);
+    res.coords[1] = (canvas_height / 2.0f - y);
     res.coords[2] = 1.0f;
     return res;
 }
@@ -380,14 +381,31 @@ void trace(scene_t* scene, const int canvas_width, const int canvas_height, put_
     {
         for (int col = 0; col < canvas_width; ++col)
         {
+            int channels[3] = { 0, 0, 0 };
+            for (int sample_y = 0; sample_y < ANTIALIASING_SAMPLES; ++sample_y)
+            {
+                for (int sample_x = 0; sample_x < ANTIALIASING_SAMPLES; ++sample_x)
+                {
+                    const float x = col + (sample_x + 0.5f) / ANTIALIASING_SAMPLES;
+                    const float y = row + (sample_y + 0.5f) / ANTIALIASING_SAMPLES;
+                    world_point p = from_viewport(viewport_point(x, y, canvas_width, canvas_height), canvas_width, canvas_height);
+                    world_line line;
+                    zero(&line.origin);
+                    line.dir = p;
+                    const color_t c = trace_ray(scene, line, 1.0f, FLT_MAX, 2);
+                    channels[0] += c.channels[0];
+                    channels[1] += c.channels[1];
+                    channels[2] += c.channels[2];
+                }
+            }
+            const int samples = ANTIALIASING_SAMPLES * ANTIALIASING_SAMPLES;
             screen_point pixel_loc;
             pixel_loc.coords[0] = col;
             pixel_loc.coords[1] = row;
-            world_point p = from_viewport(viewport_point(pixel_loc, canvas_width, canvas_height), canvas_width, canvas_height);
-            world_line line;
-            zero(&line.origin);
-            line.dir = p;
-            const color_t c = trace_ray(scene, line, 1.0f, FLT_MAX, 2);
+            color_t c;
+            c.channels[0] = (unsigned char)((channels[0] + samples / 2) / samples);
+            c.channels[1] = (unsigned char)((channels[1] + samples / 2) / samples);
+            c.channels[2] = (unsigned char)((channels[2] + samples / 2) / samples);
             put_pixel(pixel_loc, c);
         }
     }
