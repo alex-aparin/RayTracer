@@ -1,5 +1,7 @@
 # Lightweight ray tracer
 
+[![CI](https://github.com/alex-aparin/RayTracer/actions/workflows/ci.yml/badge.svg)](https://github.com/alex-aparin/RayTracer/actions/workflows/ci.yml)
+
 A portable, tiny-footprint ray tracer written in C, based on the Phong reflection model.
 
 | Demo scene (`scenes/demo.c`) | Chess balls scene (`scenes/chess_balls.c`) |
@@ -87,4 +89,4 @@ The smoke test (`tests/smoke_test.c`) covers vector math, quadratic solving and 
 
 ## License
 
-Not specified.
+[MIT](LICENSE)
